@@ -1,5 +1,6 @@
 const fs = require( "node:fs" );
 const path = require( "node:path" );
+const range = (n) => [...Array(n).keys()];
 const getAllTags = () => {
     const tags = [];
     JSON.parse(
@@ -7,6 +8,13 @@ const getAllTags = () => {
     ).forEach((faq) => tags.push(...faq.tags));
 
     return tags;
+};
+
+const getPageTags = (amount, page) => {
+    const tags = getAllTags().sort();
+    let startIndex = amount * page;
+    let endIndex = startIndex + amount;
+    return tags.slice(startIndex, endIndex);
 };
 
 const tagsExist = (faqs, tags) => {
@@ -27,4 +35,4 @@ const tagExists = (faqs, tag) => {
     return false;
 };
 
-module.exports = { getAllTags, tagsExist, tagExists };
+module.exports = { range, getAllTags, getPageTags, tagsExist, tagExists };

@@ -17,8 +17,9 @@ module.exports = {
 		const content = message.content.slice(1).toLowerCase();
 		try {
 			const miniSearch = new MiniSearch({
-				fields: [ "title", "tag" ],
-				boost: { tag: 3, title: 1 }
+				fields: [ "tag", "title" ],
+				boost: { tag: 3, title: 1 },
+				prefix: true,
 			});
 
 			const faqs = JSON.parse(fs.readFileSync(path.join( __dirname, "../data/faqs.json" )));
@@ -64,10 +65,10 @@ module.exports = {
 
 			collector.on("collect", () => msg.delete());
 			collector.on("end", (collected, reason) => {
-				if (reason != "messageDelete") {
-					const reaction = msg.reactions.resolve("🚫");
-					reaction.users.remove(client.user.id);
-				};
+				if (reason == "messageDelete") return;
+				
+				const reaction = msg.reactions.resolve("🚫");
+				reaction.users.remove(client.user.id);
 			});
 		} catch {};
 	},

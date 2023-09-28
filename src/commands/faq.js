@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, Colors } = require( "discord.js" );
+const { SlashCommandBuilder, Colors, ComponentType } = require( "discord.js" );
 const fs = require( "node:fs" );
 const path = require( "node:path" );
 const Utils = require( "../utils.js" );
@@ -77,8 +77,8 @@ module.exports = {
                         embed.footer.text = "Last Updated";
                         embed.timestamp = new Date(faq.last_updated * 1000);
                     };
-
-                    const msg = await interaction.editReply({ embeds: [ embed ] });
+                    
+                    let msg = await interaction.editReply({ embeds: [ embed ] });
                     await msg.react("🚫");
                     const collector = msg.createReactionCollector({
                         filter: (reaction, user) => (
@@ -86,6 +86,7 @@ module.exports = {
                             && user.id == interaction.user.id
                         ), time: 10 * 1000
                     });
+                    
 
                     collector.on("collect", () => msg.delete());
                     collector.on("end", (collected, reason) => {
@@ -96,12 +97,168 @@ module.exports = {
                     });
                 break;
                 case "list":
-                    const page = interaction.options.getNumber( "page" ) ?? 1;
-                    await interaction.editReply({ content: "Page: " + page });
+                    let page = interaction.options.getNumber( "page" ) ?? 1;
+                    let AMOUNT = 20;
+                    const range = Utils.range(Math.ceil(Utils.getAllTags().length / AMOUNT));
+                    if (!range[page]) page = 1;
+
+                    const pageTags = Utils.getPageTags(AMOUNT, page - 1);
+                    const buttons = [
+                        {
+                            type: 2,
+                            style: 2,
+                            custom_id: "firstPage",
+                            label: "<<",
+                        },
+                        {
+                            type: 2,
+                            style: 2,
+                            custom_id: "previousPage",
+                            label: "<",
+                        },
+                        {
+                            type: 2,
+                            style: 2,
+                            disabled: true,
+                            custom_id: "pageCount",
+                            label: page + "/" + range.length,
+                        },
+                        {
+                            type: 2,
+                            style: 2,
+                            custom_id: "nextPage",
+                            label: ">",
+                        },
+                        {
+                            type: 2,
+                            style: 2,
+                            custom_id: "lastPage",
+                            label: ">>",
+                        },
+                    ];
+
+                    switch (page) {
+                        case 1:
+                            buttons[0].disabled = true;
+                            buttons[1].disabled = true;
+                            buttons[3].disabled = false;
+                            buttons[4].disabled = false;
+                        break;
+                        case range.length:
+                            buttons[0].disabled = false;
+                            buttons[1].disabled = false;
+                            buttons[3].disabled = true;
+                            buttons[4].disabled = true;
+                        break;
+                        default:
+                            buttons[0].disabled = false;
+                            buttons[1].disabled = false;
+                            buttons[3].disabled = false;
+                            buttons[4].disabled = false;
+                        break;
+                    };
+                    
+                    let listMsg = await interaction.editReply({
+                        embeds: [
+                            {
+                                title: "All FAQ Tags",
+                                fields: [
+                                    {
+                                        name: "Tags",
+                                        value: "```\n" + pageTags.join("\n") + "```"
+                                    },
+                                ],
+                                color: Colors.Blurple,
+                                timestamp: null,
+                            },
+                        ],
+                        components: [{ type: 1, components: buttons }],
+                    });
+
+                    const listCollector = listMsg.createMessageComponentCollector({
+                        componentType: ComponentType.Button,
+                        filter: (component) => (component.user.id == interaction.user.id),
+                        time: 15 * 1000,
+                    });
+
+                    listCollector.on("collect", (component) => {
+                        listCollector.resetTimer();
+                        component.deferUpdate();
+                        switch (component.customId) {
+                            case "firstPage": page = 1; break;
+                            case "previousPage": page--; break;
+                            case "nextPage": page++; break;
+                            case "lastPage": page = range.length; break;
+                        };
+
+                        const pageTags = Utils.getPageTags(AMOUNT, page - 1);
+                        buttons[2].label = page + "/" + range.length;
+                        switch (page) {
+                            case 1:
+                                buttons[0].disabled = true;
+                                buttons[1].disabled = true;
+                                buttons[3].disabled = false;
+                                buttons[4].disabled = false;
+                            break;
+                            case range.length:
+                                buttons[0].disabled = false;
+                                buttons[1].disabled = false;
+                                buttons[3].disabled = true;
+                                buttons[4].disabled = true;
+                            break;
+                            default:
+                                buttons[0].disabled = false;
+                                buttons[1].disabled = false;
+                                buttons[3].disabled = false;
+                                buttons[4].disabled = false;
+                            break;
+                        };
+
+                        interaction.editReply({
+                            embeds: [
+                                {
+                                    title: "All FAQ Tags",
+                                    fields: [
+                                        {
+                                            name: "Tags",
+                                            value: "```\n" + pageTags.join("\n") + "```"
+                                        },
+                                    ],
+                                    color: Colors.Blurple,
+                                    timestamp: null,
+                                },
+                            ],
+                            components: [{ type: 1, components: buttons }],
+                        });
+                    });
+
+                    listCollector.on("end", (collected, reason) => {
+                        if (reason == "messageDelete") return;
+                        const pageTags = Utils.getPageTags(AMOUNT, page - 1);
+                        buttons[2].label = page + "/" + range.length;
+                        buttons[0].disabled = true;
+                        buttons[1].disabled = true;
+                        buttons[3].disabled = true;
+                        buttons[4].disabled = true;
+                        interaction.editReply({
+                            embeds: [
+                                {
+                                    title: "All FAQ Tags",
+                                    fields: [
+                                        {
+                                            name: "Tags",
+                                            value: "```\n" + pageTags.join("\n") + "```"
+                                        },
+                                    ],
+                                    color: Colors.Blurple,
+                                    timestamp: null,
+                                },
+                            ],
+                            components: [{ type: 1, components: buttons }],
+                        });
+                    });
                 break;
             };
-        } catch(e) {
-            console.log(e);
-        };
+        } catch(e) { console.log(e); };
 	},
 };
