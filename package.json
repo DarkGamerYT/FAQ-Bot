@@ -1,0 +1,8 @@
+{
+  "name": "faqs-bot",
+  "dependencies": {
+    "discord.js": "^14.13.0",
+    "dotenv": "^16.3.1",
+    "minisearch": "^6.1.0"
+  }
+}
