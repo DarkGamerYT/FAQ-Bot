@@ -43,7 +43,7 @@ module.exports = {
             const embed = {
                 title: faq.title,
                 description: faq?.description,
-                image: { url: faq?.image },
+                thumbnail: { url: faq?.image },
                 color: Colors.Blurple, //parseInt(faq?.color ?? "000000", 16),
                 footer: { text: null },
                 timestamp: null,

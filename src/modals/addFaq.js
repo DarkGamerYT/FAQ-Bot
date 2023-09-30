@@ -14,7 +14,7 @@ module.exports = {
 	execute: async ( client, interaction ) => {
         try {
             const faqTitle = interaction.fields.getTextInputValue("faqTitle");
-	        const faqTags = interaction.fields.getTextInputValue("faqTags").toLowerCase().replaceAll(" ", "").split(",");
+	        const faqTags = interaction.fields.getTextInputValue("faqTags").toLowerCase().replaceAll(" ", "").split(",").filter((t) => t.trim().length != 0);
 	        const faqDescription = interaction.fields.getTextInputValue("faqDescription");
 	        const faqImage = interaction.fields.getTextInputValue("faqImage");
 

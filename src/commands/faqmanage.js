@@ -136,7 +136,7 @@ module.exports = {
 			                    .setCustomId("faqDescription")
 			                    .setLabel("Description")
                                 .setPlaceholder("Insert a description for this faq")
-                                .setValue(foundFaq.description)
+                                .setValue(foundFaq?.description ?? "")
                                 .setRequired(false)
 			                    .setStyle(TextInputStyle.Paragraph)
                             ),
@@ -145,7 +145,7 @@ module.exports = {
 			                    .setCustomId("faqImage")
 			                    .setLabel("Image")
                                 .setPlaceholder("Insert a link")
-                                .setValue(foundFaq.image)
+                                .setValue(foundFaq?.image ?? "")
                                 .setRequired(false)
 			                    .setStyle(TextInputStyle.Short)
                             ),

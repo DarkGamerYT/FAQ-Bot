@@ -67,7 +67,7 @@ module.exports = {
                     const embed = {
                         title: faq.title,
                         description: faq?.description,
-                        image: { url: faq?.image },
+                        thumbnail: { url: faq?.image },
                         color: Colors.Blurple, //parseInt(faq?.color ?? "000000", 16),
                         footer: { text: null },
                         timestamp: null,
@@ -79,7 +79,7 @@ module.exports = {
                     };
                     
                     let msg = await interaction.editReply({ embeds: [ embed ] });
-                    await msg.react("🚫");
+                    await msg.react( "🚫" );
                     const collector = msg.createReactionCollector({
                         filter: (reaction, user) => (
                             reaction.emoji.name == "🚫"
@@ -91,7 +91,7 @@ module.exports = {
                     collector.on("collect", () => msg.delete());
                     collector.on("end", (collected, reason) => {
                         if (reason != "messageDelete") {
-                            const reaction = msg.reactions.resolve("🚫");
+                            const reaction = msg.reactions.resolve( "🚫" );
                             reaction.users.remove(client.user.id);
                         };
                     });
@@ -104,37 +104,11 @@ module.exports = {
 
                     const pageTags = Utils.getPageTags(AMOUNT, page - 1);
                     const buttons = [
-                        {
-                            type: 2,
-                            style: 2,
-                            custom_id: "firstPage",
-                            label: "<<",
-                        },
-                        {
-                            type: 2,
-                            style: 2,
-                            custom_id: "previousPage",
-                            label: "<",
-                        },
-                        {
-                            type: 2,
-                            style: 2,
-                            disabled: true,
-                            custom_id: "pageCount",
-                            label: page + "/" + range.length,
-                        },
-                        {
-                            type: 2,
-                            style: 2,
-                            custom_id: "nextPage",
-                            label: ">",
-                        },
-                        {
-                            type: 2,
-                            style: 2,
-                            custom_id: "lastPage",
-                            label: ">>",
-                        },
+                        { type: 2, style: 2, custom_id: "firstPage", label: "<<" },
+                        { type: 2, style: 2, custom_id: "previousPage", label: "<" },
+                        { type: 2, style: 2, disabled: true, custom_id: "pageCount", label: (page + "/" + range.length) },
+                        { type: 2, style: 2, custom_id: "nextPage", label: ">" },
+                        { type: 2, style: 2, custom_id: "lastPage", label: ">>" },
                     ];
 
                     switch (page) {
@@ -178,7 +152,7 @@ module.exports = {
                     const listCollector = listMsg.createMessageComponentCollector({
                         componentType: ComponentType.Button,
                         filter: (component) => (component.user.id == interaction.user.id),
-                        time: 15 * 1000,
+                        time: 60 * 1000,
                     });
 
                     listCollector.on("collect", (component) => {
@@ -192,7 +166,7 @@ module.exports = {
                         };
 
                         const pageTags = Utils.getPageTags(AMOUNT, page - 1);
-                        buttons[2].label = page + "/" + range.length;
+                        buttons[2].label = (page + "/" + range.length);
                         switch (page) {
                             case 1:
                                 buttons[0].disabled = true;
@@ -235,7 +209,7 @@ module.exports = {
                     listCollector.on("end", (collected, reason) => {
                         if (reason == "messageDelete") return;
                         const pageTags = Utils.getPageTags(AMOUNT, page - 1);
-                        buttons[2].label = page + "/" + range.length;
+                        buttons[2].label = (page + "/" + range.length);
                         buttons[0].disabled = true;
                         buttons[1].disabled = true;
                         buttons[3].disabled = true;
